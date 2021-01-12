@@ -1,0 +1,5 @@
+  -cp src
+  -lib heaps
+  -main Boot
+  -dce full
+  --resource test_opcode.ch8@test
