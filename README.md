@@ -1,9 +1,12 @@
 # VisChip8
 
+![](./demo.gif)
+
 A Visual Chip-8 emulator.
 
 * Pass [test rom](https://github.com/corax89/chip8-test-rom)
 * Visual Display for current machine states: registers, memory, program counter(`pc`), and `I`.
+* **Cross-platform**: Written in [Haxe](https://haxe.org), can be compile to js to run inside browser or to [hashlink](https://hashlink.haxe.org/) to run on local machine.
 
 ## About Chip-8
 
