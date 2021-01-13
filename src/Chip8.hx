@@ -169,7 +169,6 @@ class Chip8 {
 					}
 					V[x] -= V[y];
 					V[x] &= 0xff;
-					trace(V[x]);
 					pc += 2;
 				};
 			case ['8', _, _, '6']: {
@@ -293,18 +292,20 @@ class Chip8 {
 					memory[I] = Std.int(V[x] / 100);
 					memory[I + 1] = Std.int(V[x] / 10) % 10;
 					memory[I + 2] = V[x] % 10;
+					trace(V[x]);
+					trace(memory[I], memory[I + 1], memory[I + 2]);
 					pc += 2;
 				};
 			case ['F', _, '5', '5']: {
 					// dump reg to memory
-					for (i in 0...x) {
-						memory[i] = V[i];
+					for (i in 0...x + 1) {
+						memory[I + i] = V[i];
 					}
 					pc += 2;
 				};
 			case ['F', _, '6', '5']: {
 					// load memory to reg
-					for (i in 0...x) {
+					for (i in 0...x + 1) {
 						V[i] = memory[I + i];
 					}
 					pc += 2;
