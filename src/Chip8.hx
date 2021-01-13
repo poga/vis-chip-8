@@ -24,19 +24,21 @@ class Chip8 {
 		0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
 		0xF0, 0x80, 0xF0, 0x80, 0x80 // F
 	];
-	var memory:Vector<Int> = new Vector(4096);
-	var V:Vector<Int> = new Vector(16);
-	var I:Int = 0;
-	var pc:Int = 0x200;
 
-	var gfx:Vector<Int> = new Vector(64 * 32);
-	var delay_timer:Int = 0;
-	var sound_timer:Int = 0;
+	public var memory:Vector<Int> = new Vector(4096);
+	public var drawFlag:Bool = false;
+	public var V:Vector<Int> = new Vector(16);
+	public var I:Int = 0;
+	public var pc:Int = 0x200;
+
+	public var gfx:Vector<Int> = new Vector(64 * 32);
+	public var delay_timer:Int = 0;
+	public var sound_timer:Int = 0;
 
 	var stack:Vector<Int> = new Vector(16);
 	var sp:Int = 0;
 
-	var key:Vector<Int> = new Vector(16);
+	public var key:Vector<Int> = new Vector(16);
 
 	var rom = Resource.getBytes("test");
 
@@ -52,15 +54,11 @@ class Chip8 {
 		for (i in 0...rom.length) {
 			memory[0x200 + i] = rom.get(i);
 		}
-
-		cycle();
 	}
 
 	public function cycle() {
-		while (pc < memory.length) {
-			var op = memory.get(pc) << 8 | memory.get(pc + 1);
-			execute(op);
-		}
+		var op = memory.get(pc) << 8 | memory.get(pc + 1);
+		execute(op);
 
 		if (delay_timer > 0) {
 			delay_timer--;
@@ -78,19 +76,21 @@ class Chip8 {
 		var bytes = StringTools.lpad(StringTools.hex(op), '0', 4).split(''); // convert to strings for readability
 		var x = (op & 0x0f00) >> 8;
 		var y = (op & 0x00f0) >> 4;
-		var nn = op & 0x00ff;
 		var nnn = op & 0x0fff;
+		var nn = op & 0x00ff;
 		var n = op & 0x000f;
 		trace('exec', pc, bytes.join(''));
 
 		return switch (bytes) {
 			case ['0', '0', 'E', '0']: {
 					gfx = new Vector(64 * 32);
+					drawFlag = true;
 					pc += 2;
 				};
 			case ['0', '0', 'E', 'E']: {
 					sp--;
 					pc = stack[sp];
+					pc += 2;
 				};
 			case ['0', _, _, _]: {
 					// call machine code
@@ -99,7 +99,6 @@ class Chip8 {
 				};
 			case ['1', _, _, _]: {
 					// go to
-					trace('goto', nnn);
 					pc = nnn;
 				}
 			case ['2', _, _, _]: {
@@ -135,10 +134,12 @@ class Chip8 {
 				};
 			case ['7', _, _, _]: {
 					V[x] += nn;
+					V[x] = V[x] % 256;
 					pc += 2;
 				};
 			case ['8', _, _, '0']: {
 					V[x] += V[y];
+					V[x] = V[x] % 256;
 					pc += 2;
 				};
 			case ['8', _, _, '1']: {
@@ -154,19 +155,21 @@ class Chip8 {
 					pc += 2;
 				};
 			case ['8', _, _, '4']: {
+					V[x] += V[y];
+					V[x] = V[x] % 256;
 					if (V[y] > (0xFF - V[x])) {
 						V[0xF] = 1; // carry
 					} else {
 						V[0xF] = 0;
 					}
-					V[x] += V[y];
 					pc += 2;
 				};
 			case ['8', _, _, '5']: {
-					if (V[y] > V[x])
+					if (V[y] > V[x]) {
 						V[0xF] = 0; // borrow
-					else
+					} else {
 						V[0xF] = 1;
+					}
 					V[x] -= V[y];
 					pc += 2;
 				};
@@ -180,12 +183,13 @@ class Chip8 {
 						V[0xF] = 0; // there is a borrow
 					else
 						V[0xF] = 1;
-					V[x] = V[x] - V[y];
+					V[x] = V[y] - V[x];
 					pc += 2;
 				};
 			case ['8', _, _, 'E']: {
 					V[0xF] = V[x] >> 7;
 					V[x] = V[x] << 1;
+					V[x] = V[x] % 256;
 					pc += 2;
 				};
 			case ['9', _, _, '0']: {
@@ -206,8 +210,26 @@ class Chip8 {
 					V[x] = Std.random(255) & nn;
 					pc += 2;
 				};
-			case ['D', _, _, _]: { // TODO: draw
-					0;
+			case ['D', _, _, _]: { //  draw
+					V[0xf] = 0;
+					var height = n;
+					for (ypos in 0...height) {
+						var pixel = memory[I + ypos];
+						for (xpos in 0...8) {
+							if (pixel & (0x80 >> xpos) != 0) {
+								var xx = (V[x] + xpos) % 64;
+								var yy = (V[y] + ypos) % 32;
+								var addr = (xx + yy * 64);
+								if (gfx[addr] == 1) {
+									V[0xF] = 1;
+								}
+
+								gfx[addr] ^= 1;
+							}
+						}
+					}
+
+					drawFlag = true;
 					pc += 2;
 				};
 			case ['E', _, '9', 'E']: {
@@ -252,7 +274,13 @@ class Chip8 {
 					pc += 2;
 				};
 			case ['F', _, '1', 'E']: {
+					if (I + V[x] > 0xfff) {
+						V[0xF] = 1;
+					} else {
+						V[0xF] = 0;
+					}
 					I += V[x];
+					I = I % 256;
 					pc += 2;
 				};
 			case ['F', _, '2', '9']: {
@@ -269,7 +297,7 @@ class Chip8 {
 				};
 			case ['F', _, '5', '5']: {
 					// dump reg to memory
-					for (i in 0...0xf) {
+					for (i in 0...x) {
 						memory[i] = V[i];
 					}
 					I = I + x + 1;
@@ -277,7 +305,7 @@ class Chip8 {
 				};
 			case ['F', _, '6', '5']: {
 					// load memory to reg
-					for (i in 0...0xf) {
+					for (i in 0...x) {
 						V[i] = memory[I + i];
 					}
 					I = I + x + 1;
