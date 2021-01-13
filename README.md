@@ -2,7 +2,7 @@
 
 ![](./demo.gif)
 
-A Visual Chip-8 emulator.
+A Visual Chip-8 emulator. [demo](https://poga.github.io/vis-chip-8/)
 
 * Pass [test rom](https://github.com/corax89/chip8-test-rom)
 * Visual Display for current machine states: registers, memory, program counter(`pc`), and `I`.
