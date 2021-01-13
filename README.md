@@ -8,6 +8,24 @@ A Visual Chip-8 emulator.
 * Visual Display for current machine states: registers, memory, program counter(`pc`), and `I`.
 * **Cross-platform**: Written in [Haxe](https://haxe.org), can be compile to js to run inside browser or to [hashlink](https://hashlink.haxe.org/) to run on local machine.
 
+## Development
+
+Install [Haxe](https://haxe.org), [Heaps](https://heaps.io/), and [Hashlink](https://hashlink.haxe.org/).
+
+Build for browser:
+
+```
+$ haxe js.hxml
+$ open index.html
+```
+
+Build for hashlink:
+
+```
+$ haxe hl.sdl.hxml
+$ hl ./bin/client.hl
+```
+
 ## About Chip-8
 
 > CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker. It was initially used on the COSMAC VIP and Telmac 1800 8-bit microcomputers in the mid-1970s. CHIP-8 programs are run on a CHIP-8 virtual machine. It was made to allow video games to be more easily programmed for these computers.
