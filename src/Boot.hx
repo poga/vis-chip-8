@@ -1,15 +1,20 @@
 class Boot extends hxd.App {
-	var pixelSize = 10;
+	private var pixelSize = 10;
+	private var c:Chip8;
 
 	public static var ME:Boot;
-
-	var c:Chip8;
 
 	override function update(dt:Float) {
 		c.cycle();
 
 		if (c.drawFlag) {
 			var graphic = new h2d.Graphics(s2d);
+			// clear screen
+			graphic.beginFill(0x000000);
+			graphic.drawRect(0, 0, 64 * pixelSize, 32 * pixelSize);
+			graphic.endFill();
+
+			// draw gfx
 			graphic.beginFill(0xEA8220);
 
 			for (i in 0...c.gfx.length) {
