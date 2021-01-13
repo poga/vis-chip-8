@@ -2,8 +2,8 @@ import haxe.Resource;
 import haxe.ds.Vector;
 import hxd.Key;
 
-private typedef Reg = Int;
-private typedef Address = Int;
+private typedef Reg = UInt;
+private typedef Address = UInt;
 
 class Chip8 {
 	var fontset = [
@@ -25,26 +25,24 @@ class Chip8 {
 		0xF0, 0x80, 0xF0, 0x80, 0x80 // F
 	];
 
-	public var memory:Vector<Int> = new Vector(4096);
+	public var memory:Vector<UInt> = new Vector(4096);
 	public var drawFlag:Bool = false;
-	public var V:Vector<Int> = new Vector(16);
-	public var I:Int = 0;
-	public var pc:Int = 0x200;
+	public var V:Vector<UInt> = new Vector(16);
+	public var I:UInt = 0;
+	public var pc:UInt = 0x200;
 
-	public var gfx:Vector<Int> = new Vector(64 * 32);
-	public var delay_timer:Int = 0;
-	public var sound_timer:Int = 0;
+	public var gfx:Vector<UInt> = new Vector(64 * 32);
+	public var delay_timer:UInt = 0;
+	public var sound_timer:UInt = 0;
 
-	var stack:Vector<Int> = new Vector(16);
-	var sp:Int = 0;
+	var stack:Vector<UInt> = new Vector(16);
+	var sp:UInt = 0;
 
-	public var key:Vector<Int> = new Vector(16);
+	public var key:Vector<UInt> = new Vector(16);
 
 	var rom = Resource.getBytes("test");
 
 	public function new() {
-		trace(rom.length);
-
 		// load font
 		for (i in 0...fontset.length) {
 			memory[i] = fontset[i];
@@ -72,14 +70,14 @@ class Chip8 {
 		}
 	}
 
-	function execute(op:Int) {
+	function execute(op:UInt) {
 		var bytes = StringTools.lpad(StringTools.hex(op), '0', 4).split(''); // convert to strings for readability
 		var x = (op & 0x0f00) >> 8;
 		var y = (op & 0x00f0) >> 4;
 		var nnn = op & 0x0fff;
 		var nn = op & 0x00ff;
 		var n = op & 0x000f;
-		trace('exec', pc, bytes.join(''));
+		// trace('exec', pc, bytes.join(''));
 
 		return switch (bytes) {
 			case ['0', '0', 'E', '0']: {
@@ -138,8 +136,7 @@ class Chip8 {
 					pc += 2;
 				};
 			case ['8', _, _, '0']: {
-					V[x] += V[y];
-					V[x] = V[x] % 256;
+					V[x] = V[y];
 					pc += 2;
 				};
 			case ['8', _, _, '1']: {
@@ -171,6 +168,8 @@ class Chip8 {
 						V[0xF] = 1;
 					}
 					V[x] -= V[y];
+					V[x] &= 0xff;
+					trace(V[x]);
 					pc += 2;
 				};
 			case ['8', _, _, '6']: {
@@ -184,6 +183,7 @@ class Chip8 {
 					else
 						V[0xF] = 1;
 					V[x] = V[y] - V[x];
+					V[x] &= 0xff;
 					pc += 2;
 				};
 			case ['8', _, _, 'E']: {
@@ -300,7 +300,6 @@ class Chip8 {
 					for (i in 0...x) {
 						memory[i] = V[i];
 					}
-					I = I + x + 1;
 					pc += 2;
 				};
 			case ['F', _, '6', '5']: {
@@ -308,7 +307,6 @@ class Chip8 {
 					for (i in 0...x) {
 						V[i] = memory[I + i];
 					}
-					I = I + x + 1;
 					pc += 2;
 				};
 			case _: throw "Unknown OPCode: " + bytes.join('');
