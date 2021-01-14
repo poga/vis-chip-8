@@ -109,13 +109,18 @@ Boot.main = function() {
 Boot.__super__ = hxd_App;
 Boot.prototype = $extend(hxd_App.prototype,{
 	update: function(dt) {
+		var graphic = new h2d_Graphics(this.s2d);
+		var v = this.c.memory[this.c.pc];
+		graphic.beginFill(v << 16 | v << 8 | v);
+		graphic.drawRect(UInt.toFloat(this.mem_pos[0] + (UInt.toFloat(this.c.pc) % UInt.toFloat(64) | 0) * this.pixelSize),this.mem_pos[1] + (UInt.toFloat(this.c.pc) / UInt.toFloat(64) | 0) * this.pixelSize,this.pixelSize,this.pixelSize);
+		graphic.endFill();
 		this.c.cycle();
 		if(this.c.drawFlag) {
-			var graphic = new h2d_Graphics(this.s2d);
-			graphic.beginFill(0);
-			graphic.drawRect(0,0,64 * this.pixelSize,32 * this.pixelSize);
-			graphic.endFill();
-			graphic.beginFill(15368736);
+			var graphic1 = new h2d_Graphics(this.s2d);
+			graphic1.beginFill(0);
+			graphic1.drawRect(0,0,64 * this.pixelSize,32 * this.pixelSize);
+			graphic1.endFill();
+			graphic1.beginFill(15368736);
 			var _g = 0;
 			var _g1 = this.c.gfx.length;
 			while(_g < _g1) {
@@ -123,13 +128,12 @@ Boot.prototype = $extend(hxd_App.prototype,{
 				var x = i % 64;
 				var y = i / 64 | 0;
 				if(this.c.gfx[i] == 1) {
-					graphic.drawRect(x * this.pixelSize,y * this.pixelSize,this.pixelSize,this.pixelSize);
+					graphic1.drawRect(x * this.pixelSize,y * this.pixelSize,this.pixelSize,this.pixelSize);
 				}
 			}
-			graphic.endFill();
+			graphic1.endFill();
 			this.c.drawFlag = false;
 		}
-		var graphic = new h2d_Graphics(this.s2d);
 		graphic.beginFill(0);
 		graphic.drawRect(this.v_pos[0],this.v_pos[1],200,50);
 		graphic.endFill();
@@ -140,8 +144,8 @@ Boot.prototype = $extend(hxd_App.prototype,{
 		var _g1 = this.c.V.length;
 		while(_g < _g1) {
 			var i = _g++;
-			var v = this.c.V[i];
-			graphic.beginFill(v << 16 | v << 8 | v);
+			var v1 = this.c.V[i];
+			graphic.beginFill(v1 << 16 | v1 << 8 | v1);
 			graphic.drawRect(this.v_pos[0] + i * this.pixelSize,this.v_pos[1],this.pixelSize,this.pixelSize);
 			graphic.endFill();
 		}
@@ -150,14 +154,20 @@ Boot.prototype = $extend(hxd_App.prototype,{
 		var _g1 = this.c.memory.length;
 		while(_g < _g1) {
 			var i = _g++;
-			var v = this.c.memory[i];
-			if(this.last_memory[i] != v) {
-				graphic.beginFill(v << 16 | v << 8 | v);
+			var v1 = this.c.memory[i];
+			if(this.last_memory[i] != v1) {
+				graphic.beginFill(v1 << 16 | v1 << 8 | v1);
 				graphic.drawRect(this.mem_pos[0] + i % 64 * this.pixelSize,this.mem_pos[1] + (i / 64 | 0) * this.pixelSize,this.pixelSize,this.pixelSize);
 				graphic.endFill();
 				this.last_memory[i] = this.c.memory[i];
 			}
 		}
+		graphic.beginFill(16711680);
+		graphic.drawRect(UInt.toFloat(this.mem_pos[0] + (UInt.toFloat(this.c.pc) % UInt.toFloat(64) | 0) * this.pixelSize),this.mem_pos[1] + (UInt.toFloat(this.c.pc) / UInt.toFloat(64) | 0) * this.pixelSize,this.pixelSize,this.pixelSize);
+		graphic.endFill();
+		graphic.beginFill(v << 16 | v << 8 | v);
+		graphic.drawRect(UInt.toFloat(this.mem_pos[0] + (UInt.toFloat(this.c.pc) % UInt.toFloat(64) | 0) * this.pixelSize + 1),this.mem_pos[1] + (UInt.toFloat(this.c.pc) / UInt.toFloat(64) | 0) * this.pixelSize + 1,this.pixelSize - 2,this.pixelSize - 2);
+		graphic.endFill();
 		var tf = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
 		tf.set_text("PC = " + (this.c.pc == null ? "null" : Std.string(UInt.toFloat(this.c.pc))) + ", I = " + (this.c.I == null ? "null" : Std.string(UInt.toFloat(this.c.I))));
 		var x = this.v_pos[0];

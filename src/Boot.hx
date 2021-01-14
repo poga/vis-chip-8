@@ -10,6 +10,14 @@ class Boot extends hxd.App {
 	public static var ME:Boot;
 
 	override function update(dt:Float) {
+		var graphic = new h2d.Graphics(s2d);
+
+		// clear last pc pointer
+		var v = c.memory[c.pc];
+		graphic.beginFill(v << 16 | v << 8 | v);
+		graphic.drawRect(mem_pos[0] + (c.pc % 64) * pixelSize, mem_pos[1] + (Std.int(c.pc / 64) * pixelSize), pixelSize, pixelSize);
+		graphic.endFill();
+
 		c.cycle();
 		if (c.drawFlag) {
 			var graphic = new h2d.Graphics(s2d);
@@ -33,8 +41,8 @@ class Boot extends hxd.App {
 
 			c.drawFlag = false;
 		}
+
 		// clear sidebar
-		var graphic = new h2d.Graphics(s2d);
 		graphic.beginFill(0x000000);
 		graphic.drawRect(v_pos[0], v_pos[1], 200, 50);
 		graphic.endFill();
@@ -62,6 +70,15 @@ class Boot extends hxd.App {
 				last_memory[i] = c.memory[i];
 			}
 		}
+
+		// draw pc
+		graphic.beginFill(0xFF0000);
+		graphic.drawRect(mem_pos[0] + (c.pc % 64) * pixelSize, mem_pos[1] + (Std.int(c.pc / 64) * pixelSize), pixelSize, pixelSize);
+		graphic.endFill();
+		graphic.beginFill(v << 16 | v << 8 | v);
+		graphic.drawRect((mem_pos[0] + (c.pc % 64) * pixelSize + 1), (mem_pos[1] + (Std.int(c.pc / 64) * pixelSize) + 1), pixelSize - 2, pixelSize - 2);
+		graphic.endFill();
+
 		// PC and I
 
 		var tf = new h2d.Text(hxd.res.DefaultFont.get(), s2d);
