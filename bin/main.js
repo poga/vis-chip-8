@@ -150,14 +150,14 @@ Boot.prototype = $extend(hxd_App.prototype,{
 		var _g1 = this.c.memory.length;
 		while(_g < _g1) {
 			var i = _g++;
-			var v = this.c.V[i];
+			var v = this.c.memory[i];
 			if(this.last_memory[i] != v) {
 				graphic.beginFill(v << 16 | v << 8 | v);
-				graphic.drawRect(this.mem_pos[0] + i % 64 * this.pixelSize,this.mem_pos[1] + (i / 64 | 0) * this.pixelSize + 1,this.pixelSize,this.pixelSize);
+				graphic.drawRect(this.mem_pos[0] + i % 64 * this.pixelSize,this.mem_pos[1] + (i / 64 | 0) * this.pixelSize,this.pixelSize,this.pixelSize);
 				graphic.endFill();
+				this.last_memory[i] = this.c.memory[i];
 			}
 		}
-		this.last_memory = this.c.memory;
 		var tf = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
 		tf.set_text("PC = " + (this.c.pc == null ? "null" : Std.string(UInt.toFloat(this.c.pc))) + ", I = " + (this.c.I == null ? "null" : Std.string(UInt.toFloat(this.c.I))));
 		var x = this.v_pos[0];

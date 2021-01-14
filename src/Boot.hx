@@ -54,14 +54,14 @@ class Boot extends hxd.App {
 
 		// draw memory
 		for (i in 0...c.memory.length) {
-			var v = c.V[i];
+			var v = c.memory[i];
 			if (last_memory[i] != v) {
 				graphic.beginFill(v << 16 | v << 8 | v);
-				graphic.drawRect(mem_pos[0] + (i % 64) * pixelSize, mem_pos[1] + Std.int(i / 64) * pixelSize + 1, pixelSize, pixelSize);
+				graphic.drawRect(mem_pos[0] + (i % 64) * pixelSize, mem_pos[1] + (Std.int(i / 64) * pixelSize), pixelSize, pixelSize);
 				graphic.endFill();
+				last_memory[i] = c.memory[i];
 			}
 		}
-		last_memory = c.memory;
 		// PC and I
 
 		var tf = new h2d.Text(hxd.res.DefaultFont.get(), s2d);
